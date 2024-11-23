@@ -1,0 +1,373 @@
+shell:priv-lvl=15
+
+MPLS supah lab:
+R1234 D12 I12
+Line 661 to 1170 
+
+CCNP Eterprise
+Minimum skills:
+ServerSide 
+1. ADS (LDAP) -- Active director / Octa / Gmail 
+2. x.500 CertificateServiceAuthority
+Server
+Update IP4 setting
+Ping coretaas and baba and sarili
+Dapat wala DNS
+3. DHCP
+4. NetworkPolicyServer: radius, 802.1x authentication
+Authentication,Authorization,Accounting:
+Task1: Radius Authentication for Switches/voiceGateway
+Taas/Baba:
+config t
+AAA new-model
+username admin password pass
+radius-server host 10.11.1.8 key secret123
+ip radius source-interface vlan 1
+aaa authorization exec default group radius
+aaa authentication login default group radius local
+line vty 0 14
+ login authentication default
+end
+
+Task2: Balik CCNA
+config t
+no AAA new-model
+no radius-server host 10.11.1.8 key secret123
+
+config t
+line vty 0 14
+ no login
+end
+
+Task3: Deploying Cisco 802.1x port based authentication using windows Certificates:
+config t
+aaa new-model
+aaa authentication dot1x default group radius
+aaa authorization network default group radius
+aaa accounting dot1x default start-stop group radius
+dot1x system-auth-control
+radius-server host 10.11.1.8 auth-port 1812 acct-port 1813 key secret123
+int fa 0/3
+switchport mode access
+authentication port-control auto
+dot1x port-control auto
+spanning-tree portfast
+end
+
+
+Newer/IOS/Linux 802.1 config 
+conf t
+aaa new-model
+aaa authentication dot1x default group radius
+aaa authorization network default group radius
+aaa accounting dot1x default start-stop group radius
+dot1x system-auth-control
+radius-server host 10.11.1.8 auth-port 1812 acct-port 1813 key secret123
+interface fastEthernet 0/5
+ switchport mode access
+ authentication port-control auto
+ dot1x pae authenticator
+ spanning-tree portfast
+end
+
+
+sevices.msc
+
+
+MP BGP no bgp default ipv4-unicast
+lagay eigrp
+lagay ospf
+redistribute
+
+====
+
+I2BPIb(config)#int lo 69
+I2BPIb(config-if)#ip add 
+*Nov 23 04:44:32.723: %LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback69, changed state to up
+I2BPIb(config-if)#ip add 69.0.0.1 255.255.255.255
+I2BPIb(config-if)#do ping  69.0.0.1 
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 69.0.0.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 4/4/5 ms
+
+
+===
+
+
+PNBb(config)#router eigrp 90
+PNBb(config-router)#network 10.0.0.0
+PNBb(config-router)#network 69.0.0.0
+PNBb(config-router)#int lo 69
+PNBb(config-if)#
+*Nov 23 04:46:11.337: %LINEPROTO-5-UPDOWN: Line protocol on Interface Loopback69, changed state to up
+PNBb(config-if)#ip add 69.0.0.1 255.255.255.255
+PNBb(config-if)#do ping  69.0.0.1 
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 69.0.0.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 4/4/5 ms
+
+
+====
+
+TASK 4: NEXUS
+
+DCJP(config)# show feature
+DC-PHIL(config-router)# show checkpoint summary 
+DC-Pinas(config)# rollback running-config checkpoint config3
+DC-PHIL(config)# show ip int br
+===
+
+NSOXb(config)# feature
+feature       feature-set   
+NSOXb(config)# feature bgp 
+NSOXb(config)# 2024 Nov 23 05:44:49 NSOXb %$ VDC-1 %$ %LICMGR-2-LOG_LIC_MISSING_WARNING: A feature that requires LAN_ENTERPRISE_SERVICES_PKG license is not installed. System supports honor based licensing so feature will continue to be fully functional. Use 'show license usage <package-name>' to find features using missing license.
+
+NSOXb(config)# feature ospf
+NSOXb(config)# feature eigrp
+NSOXb(config)# hostname DC-PH
+DC-PH(config)# int lo 1
+DC-PH(config-if)# ip add 1.1.1.1/32
+DC-PH(config-if)# no shut
+DC-PH(config-if)# checkpoint config1
+Done
+
+====
+
+TASK5: CCNP ENCOR SKILL NO.5 LEARN NEXUS vs CATALYST
+$$$$$$$$$bawal ang copy/paste - namamatay$$$$$$
+VXLAN = vlan for data center:
+show feature
+config t
+feature ospf
+feature nv overlay
+feature vn-segment-vlan-based
+system jumbomtu 9216
+end
+copy run start
+
+=====
+
+
+router eigrp
+router bgp
+
+DC-JP# conf t
+Enter configuration commands, one per line. End with CNTL/Z.
+DC-JP(config)# router ospf 10
+DC-JP(config-router)# exit
+DC-JP(config)# int e1/1
+DC-JP(config-if)# no switchport 
+DC-JP(config-if)# ip add 100.1.1.1/30
+DC-JP(config-if)# ip router ospf 10 area 0
+DC-JP(config-if)# no shutdown 
+DC-JP(config-if)# exit
+DC-JP(config)# int loopback 0
+DC-JP(config-if)# ip add 10.10.10.10/32
+DC-JP(config-if)# ip router ospf 10 area 0
+DC-JP(config-if)# exit
+DC-JP(config)# vlan 50
+DC-JP(config-vlan)# vn-segment 5000
+DC-JP(config-vlan)# exit
+Warning: Enable double-wide arp-ether tcam carving if igmp snooping/Hsrp over vxlan is enabled. Ignore if tcam carving is already configured.
+DC-JP(config)# int ethernet 1/5-6
+DC-JP(config-if-range)# switchport 
+DC-JP(config-if-range)# switchport access vlan 50
+DC-JP(config-if-range)# exit
+DC-JP(config)# int Nve 1
+DC-JP(config-if-nve)# no shutdown 
+DC-JP(config-if-nve)# source-interface lo 0
+DC-JP(config-if-nve)# member vni 5000
+DC-JP(config-if-nve-vni)# ingress-replication protocol static 
+DC-JP(config-if-nve-vni-ingr-rep)# peer-ip 20.20.20.20
+DC-JP(config-if-nve-vni-ingr-rep)# exit
+DC-JP(config-if-nve-vni)# end
+
+====
+
+DC-PHIL# conf t
+Enter configuration commands, one per line. End with CNTL/Z.
+DC-PHIL(config)# router ospf 10
+DC-PHIL(config-router)# int ethernet 1/1
+DC-PHIL(config-if)# no switchport 
+DC-PHIL(config-if)# ip add 100.1.1.2/30
+DC-PHIL(config-if)# ip route ospf 10 area 0
+DC-PHIL(config-if)# no shut
+DC-PHIL(config-if)# int lo 0
+DC-PHIL(config-if)# int lo0
+DC-PHIL(config-if)# ip add 20.20.20.20/32
+DC-PHIL(config-if)# ip route ospf 10 are 0
+DC-PHIL(config-if)# vlan 50
+DC-PHIL(config-vlan)# vn-segment 5000
+DC-PHIL(config-vlan)# int et 1/5-6
+Warning: Enable double-wide arp-ether tcam carving if igmp snooping/Hsrp over vxlan is enabled. Ignore if tcam carving is already configured.
+DC-PHIL(config-if-range)# switchport 
+DC-PHIL(config-if-range)# switchport access vlan 50
+DC-PHIL(config-if-range)# no shut
+DC-PHIL(config-if-range)# int nve 1
+DC-PHIL(config-if-nve)# no shutdown 
+DC-PHIL(config-if-nve)# source-interface loopback 0
+DC-PHIL(config-if-nve)# member vni 5000
+DC-PHIL(config-if-nve-vni)# ingress-replication protocol static 
+DC-PHIL(config-if-nve-vni-ingr-rep)# peer-ip 10.10.10.10
+DC-PHIL(config-if-nve-vni-ingr-rep)# exit
+DC-PHIL(config-if-nve-vni)# exit
+DC-PHIL(config-if-nve)# end
+
+====
+
+====
+
+DC-JP(config-router)# show nve vni
+Codes: CP - Control Plane        DP - Data Plane          
+       UC - Unconfigured         SA - Suppress ARP        
+       SU - Suppress Unknown Unicast 
+       Xconn - Crossconnect      
+       MS-IR - Multisite Ingress Replication
+ 
+Interface VNI      Multicast-group   State Mode Type [BD/VRF]      Flags
+--------- -------- ----------------- ----- ---- ------------------ -----
+nve1      5000     UnicastStatic     Up    DP   L2 [50]                 
+
+DC-JP(config-router)# show vxlan
+Vlan            VN-Segment
+====            ==========
+50              5000
+DC-JP(config-router)# 
+DC-JP(config-router)# show nve peers
+Interface Peer-IP                                 State LearnType Uptime   Route
+r-Mac       
+--------- --------------------------------------  ----- --------- -------- -----
+------------
+nve1      20.20.20.20                             Up    DP        00:02:27 n/a  
+
+====
+
+
+
+Router(config)#hostname R1-JAPAN
+R1-JAPAN(config)#no logg cons
+R1-JAPAN(config)#int e0/0
+R1-JAPAN(config-if)#no shut
+R1-JAPAN(config-if)#ip add 10.0.0.1 255.0.0.0
+R1-JAPAN(config-if)#do ping 10.0.0.3
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.0.0.3, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 3/4/6 ms
+
+===
+
+R3-PINAS(config)#no logg cons
+R3-PINAS(config)#int e0/0
+R3-PINAS(config-if)#no shut
+R3-PINAS(config-if)#ip add 10.0.0.3 255.0.0.0
+R3-PINAS(config-if)#do ping 10.0.0.3
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.0.0.3, timeout is 2 seconds:
+!!!!!
+
+
+
+=====
+
+How to check vxlan:
+show vxlan
+show nve peers
+show nve vni
+
+=====
+
+v380 pro cctv camera
+LISP Locator/ID Separation Protocol  - Private to Public
+2023MplsBgpVrfFEB17.txt
+1 to 102
+
+TASK6: LISP for IP CAMERA, IOT
+R1: 
+Conf t
+no logging console
+line vty 0 14
+exec-timeout 0 0
+int gi 1
+ ip add 192.168.101.11 255.255.255.0
+ no shut
+
+int gi 1
+ip add 192.168.101.12 255.255.255.0
+
+int gi 1
+ip add 192.168.101.13 255.255.255.0
+
+
+======
+
+TASK 7 Configure VPN
+H - Hashing - SHA256 - Data Integrity
+E - Encryption - AES - Enrypt (Symmetric Assymetric)
+P - Protocol - ESP - Encapsulating Security Payload - Create Tunnel
+A - Authentication - PSK - Pre shared key - Site1 and Site2
+
+Open CCNPA_APP > Csr1000v csr1000v-universalk9.16.09.05
+@R1/Site1
+en
+conf t
+int gi2
+ip add 192.168.102.10 255.255.255.0
+
+@R2/Site2
+conf t
+int gi2
+ip add 192.168.102.20 255.255.255.0
+
+
+Open in secureCRT
+Open BRANCH1 and 2 VIA YVM.OVA
+Update Network Adaptor VMNET3 (Br1) VMNET4 (Br2) and 512
+
+
+====
+basic routing
+@R1/Site1
+config t
+no logging console
+no ip domain lookup
+ip route 0.0.0.0 0.0.0.0 200.0.0.20
+int gi 1
+ip add 200.0.0.10 255.255.255.0
+no shut
+int gi3
+ip add 10.10.10.1 255.255.255.0
+no shut
+
+@R2/Site2
+config t
+no logging console
+no ip domain lookup
+ip route 0.0.0.0 0.0.0.0 200.0.0.10
+int gi 1
+ip add 200.0.0.20 255.255.255.0
+no shut
+int gi3
+ip add 10.20.20.1 255.255.255.0
+no shut
+
+
+Branch1
+sudo ifconfig eth0 10.10.10.10 netmask 255.255.255.0 up
+sudo route add default gw 10.10.10.1
+ping 10.20.20.20
+traceroute 10.20.20.20
+2nd hop is 200.0.0.20
+access on browser https://192.168.102.10
+
+Branch2
+sudo ifconfig eth0 10.20.20.20 netmask 255.255.255.0 up
+sudo route add default gw 10.20.20.1
+ping 10.10.10.10
+
+Need sabay iconfig sa browser/gui
+Refresh ung down para mag up
+check uli traceroute kabilang branch dapat tunnel ip - 172....
+
